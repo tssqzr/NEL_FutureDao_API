@@ -16,13 +16,14 @@ namespace NEL_FutureDao_API.Service
         private string ethVoteStateCol = "ethVoteState";
 
         // 发布项目
-        public JArray storeProjInfo(string address, string hash, string creator, string projName, string projDetail, string projTeam, string revengePlan)
+        public JArray storeProjInfo(string hash, string voteHash, string address, string creator, string projName, string projDetail, string projTeam, string revengePlan)
         {
             string findStr = new JObject { { "address", address}, {"hash", hash },{ "projName", projName} }.ToString();
             if (mh.GetDataCount(mongodbConnStr, mongodbDatabase, projInfoCol, findStr) == 0)
             {
                 var newdata = new JObject {
                     { "hash", hash},
+                    { "voteHash", voteHash},
                     { "address", address},
                     { "creator", creator},
                     { "projName", projName},
@@ -37,13 +38,13 @@ namespace NEL_FutureDao_API.Service
             return new JArray { new JObject { { "res", false } } };
         }
         // 发布治理
-        public JArray storeVoteInfo(string address, string hash, string voter, string name, string summary, string detail)
+        public JArray storeVoteInfo(string voteHash, string address, string voter, string name, string summary, string detail)
         {
-            string findStr = new JObject { { "address", address }, { "hash", hash }, { "name", name } }.ToString();
+            string findStr = new JObject { { "voteHash", voteHash }, { "address", address }, { "name", name } }.ToString();
             if(mh.GetDataCount(mongodbConnStr, mongodbDatabase, voteInfoCol, findStr) == 0)
             {
                 var newdata = new JObject {
-                    { "hash", hash},
+                    { "voteHash", voteHash},
                     { "address", address},
                     { "name", name},
                     { "summary", summary},
@@ -130,8 +131,24 @@ namespace NEL_FutureDao_API.Service
             var queryRes = mh.GetDataPagesWithField(mongodbConnStr, mongodbDatabase, ethPriceStateCol, fieldStr, pageSize, pageNum, sortStr, findStr);
             if (queryRes == null || queryRes.Count == 0) return new JArray { };
 
+            var res = queryRes.Select(p =>
+            {
+                JObject jo = (JObject)p;
+                var projName = "";
+                var voteHash = "";
+                var subfindStr = new JObject { { "hash", jo["hash"].ToString().ToLower() } }.ToString();
+                var subfieldStr = new JObject { { "projName", 1 },{"voteHash",1 } }.ToString();
+                var subres = mh.GetDataWithField(mongodbConnStr, mongodbDatabase, projInfoCol, subfieldStr, subfindStr);
+                if (subres != null && subres.Count > 0) {
+                    projName = subres[0]["projName"].ToString();
+                    voteHash = subres[0]["voteHash"].ToString();
+                }
+                jo.Add("voteHash", voteHash);
+                jo.Add("projName", projName);
+                return jo;
+            }).ToArray();
             var count = mh.GetDataCount(mongodbConnStr, mongodbDatabase, ethPriceStateCol, findStr);
-            return new JArray { new JObject { { "count", count }, { "list", queryRes } } };
+            return new JArray { new JObject { { "count", count }, { "list", new JArray { res } } } };
         }
     }
 
