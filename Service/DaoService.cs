@@ -178,11 +178,4 @@ namespace NEL_FutureDao_API.Service
             return new JArray { new JObject { { "count", count }, { "list", new JArray { res } } } };
         }
     }
-
-    class VoteState
-    {
-        public const int Voting = 0;  // 投票中
-        public const int Executing = 1;// 执行中
-        public const int End = 2; // 结束
-    }
 }
