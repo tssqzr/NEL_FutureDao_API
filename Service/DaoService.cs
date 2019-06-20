@@ -131,6 +131,7 @@ namespace NEL_FutureDao_API.Service
             string findStr = new JObject { {"hash", hash} }.ToString();
             string sortStr = new JObject { { "startTime", -1 } }.ToString();
             string fieldStr = new JObject { { "_id",0},
+                { "voteHash", 1 },
                 { "proposalName", 1 },
                 { "timeConsuming", 1 },
                 { "proposer",1 },
@@ -151,27 +152,22 @@ namespace NEL_FutureDao_API.Service
         {
             string findStr = "{}";
             string sortStr = new JObject { { "time", -1} }.ToString();
-            string fieldStr = new JObject { {"hash", 1},{ "perFrom24h",1 },{ "_id",0} }.ToString();
-            var queryRes = mh.GetDataPagesWithField(mongodbConnStr, mongodbDatabase, ethPriceStateCol, fieldStr, pageSize, pageNum, sortStr, findStr);
+            string fieldStr = new JObject { {"hash", 1}, { "voteHash", 1 }, { "projName", 1 },{ "creator", 1 },{ "_id",0} }.ToString();
+            var queryRes = mh.GetDataPagesWithField(mongodbConnStr, mongodbDatabase, projInfoCol, fieldStr, pageSize, pageNum, sortStr, findStr);
             if (queryRes == null || queryRes.Count == 0) return new JArray { };
 
             var res = queryRes.Select(p =>
             {
                 JObject jo = (JObject)p;
-                var projName = "";
-                var voteHash = "";
-                var creator = "";
+                var perFrom24h = "0";
                 var subfindStr = new JObject { { "hash", jo["hash"].ToString().ToLower() } }.ToString();
-                var subfieldStr = new JObject { { "projName", 1 },{"voteHash",1 },{ "creator",1} }.ToString();
-                var subres = mh.GetDataWithField(mongodbConnStr, mongodbDatabase, projInfoCol, subfieldStr, subfindStr);
+                var subsortStr = new JObject { { "blocktime",-1 } }.ToString();
+                var subfieldStr = new JObject { { "perFrom24h", 1 }}.ToString();
+                var subres = mh.GetDataPagesWithField(mongodbConnStr, mongodbDatabase, ethPriceStateCol, subfieldStr, 1,1, subsortStr, subfindStr);
                 if (subres != null && subres.Count > 0) {
-                    voteHash = subres[0]["voteHash"].ToString();
-                    projName = subres[0]["projName"].ToString();
-                    creator = subres[0]["creator"].ToString();
+                    perFrom24h = subres[0]["perFrom24h"].ToString();
                 }
-                jo.Add("voteHash", voteHash);
-                jo.Add("projName", projName);
-                jo.Add("creator", creator);
+                jo.Add("perFrom24h", perFrom24h);
                 return jo;
             }).ToArray();
             var count = mh.GetDataCount(mongodbConnStr, mongodbDatabase, ethPriceStateCol, findStr);
