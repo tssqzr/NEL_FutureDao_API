@@ -137,6 +137,7 @@ namespace NEL_FutureDao_API.Service
             string findStr = new JObject { {"hash", hash} }.ToString();
             string sortStr = new JObject { { "startTime", -1 } }.ToString();
             string fieldStr = new JObject { { "_id",0},
+                { "hash", 1 },
                 { "voteHash", 1 },
                 { "proposalName", 1 },
                 { "timeConsuming", 1 },
@@ -149,8 +150,24 @@ namespace NEL_FutureDao_API.Service
             var queryRes = mh.GetDataNewPages(mongodbConnStr, mongodbDatabase, ethVoteStateCol, findStr, sortStr, (pageNum - 1) * pageSize, pageSize, fieldStr); ;
             if (queryRes == null || queryRes.Count == 0) return new JArray { };
 
+            var res = queryRes.Select(p =>
+            {
+                string voter = "";
+                JObject jo = (JObject)p;
+                var subfindStr = new JObject {
+                    { "hash", jo["hash"].ToString().ToLower() },
+                    { "voteHash", jo["voteHash"].ToString().ToLower() },
+                    { "name", jo["proposalName"].ToString()}
+                }.ToString();
+                var subsortStr = new JObject { { "blocktime", -1 } }.ToString();
+                var subfieldStr = new JObject { { "voter", 1 } }.ToString();
+                var subres = mh.GetDataWithField(mongodbConnStr, mongodbDatabase, voteInfoCol, subfieldStr, subfieldStr);
+                if(subres != null && subres.Count > 0) { voter = subres[0]["voter"].ToString(); }
+                jo.Add("voter", voter);
+                return jo;
+            }).ToArray();
             var count = mh.GetDataCount(mongodbConnStr, mongodbDatabase, ethVoteStateCol, findStr);
-            return new JArray { new JObject { {"count", count },{ "list", queryRes} } };
+            return new JArray { new JObject { { "count", count }, { "list", new JArray { res } } } };
         }
 
         public JArray getHashInfoByVoteHash(string voteHash)
