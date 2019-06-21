@@ -153,6 +153,15 @@ namespace NEL_FutureDao_API.Service
             return new JArray { new JObject { {"count", count },{ "list", queryRes} } };
         }
 
+        public JArray getHashInfoByVoteHash(string voteHash)
+        {
+            string findStr = new JObject { { "voteHash", voteHash} }.ToString();
+            string fieldStr = new JObject { { "hash", 1},{ "projName",1} }.ToString();
+            var queryRes = mh.GetDataWithField(mongodbConnStr, mongodbDatabase, projInfoCol, fieldStr, findStr);
+            if (queryRes == null || queryRes.Count == 0) return new JArray { };
+
+            return new JArray { new JObject { { "hash", queryRes[0]["hash"].ToString() }, { "projName", queryRes[0]["projName"].ToString() } } };
+        }
         // 显示.查询服务列表
         public JArray getServiceList(int pageNum=1, int pageSize=10)
         {
