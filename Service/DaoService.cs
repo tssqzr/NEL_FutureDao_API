@@ -75,17 +75,21 @@ namespace NEL_FutureDao_API.Service
                 joinCount = queryRes.Select(p => p["address"].ToString()).Distinct().Count();
             }
 
-            var creator = "";
             var voteHash = "";
-            fieldStr = new JObject { { "creator",1},{ "voteHash",1} }.ToString();
+            var creator = "";
+            var address = "";
+            var projName = "";
+            fieldStr = new JObject { { "voteHash", 1 }, { "address", 1 }, { "creator",1},{ "projName",1}  }.ToString();
             var subres = mh.GetDataWithField(mongodbConnStr, mongodbDatabase, projInfoCol, fieldStr, findStr);
             if(subres != null && subres.Count > 0)
             {
-                creator = subres[0]["creator"].ToString();
                 voteHash = subres[0]["voteHash"].ToString();
+                address = subres[0]["address"].ToString();
+                creator = subres[0]["creator"].ToString();
+                projName = subres[0]["projName"].ToString();
             }
 
-            return new JArray { new JObject { { "creator", creator},{ "voteHash", voteHash },{ "joinCount", joinCount } } };
+            return new JArray { new JObject { { "voteHash", voteHash }, { "address", address }, { "creator", creator}, { "projName", projName }, { "joinCount", joinCount } } };
         }
         public JArray getProjTxHistList(string hash, int pageNum=1, int pageSize=10)
         {
@@ -152,7 +156,7 @@ namespace NEL_FutureDao_API.Service
         {
             string findStr = "{}";
             string sortStr = new JObject { { "time", -1} }.ToString();
-            string fieldStr = new JObject { {"hash", 1}, { "voteHash", 1 }, { "projName", 1 },{ "creator", 1 },{ "_id",0} }.ToString();
+            string fieldStr = new JObject { {"hash", 1}, { "voteHash", 1 }, { "address", 1 }, { "creator", 1 }, { "projName", 1 }, { "_id",0} }.ToString();
             var queryRes = mh.GetDataPagesWithField(mongodbConnStr, mongodbDatabase, projInfoCol, fieldStr, pageSize, pageNum, sortStr, findStr);
             if (queryRes == null || queryRes.Count == 0) return new JArray { };
 
