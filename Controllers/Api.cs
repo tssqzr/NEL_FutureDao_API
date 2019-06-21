@@ -80,7 +80,7 @@ namespace NEL_FutureDao_API.Controllers
                         break;
                     // 存储治理信息(治理)
                     case "storeVoteInfo":
-                        result = daoService.storeVoteInfo(req.@params[0].ToString(), req.@params[1].ToString(), req.@params[2].ToString(), req.@params[3].ToString(), req.@params[4].ToString(), req.@params[5].ToString(), req.@params[6].ToString());
+                        result = daoService.storeVoteInfo(req.@params[0].ToString(), req.@params[1].ToString(), req.@params[2].ToString(), req.@params[3].ToString(), req.@params[4].ToString(), req.@params[5].ToString(), req.@params[6].ToString(), req.@params[7].ToString());
                         break;
                     // 存储项目信息(众筹)
                     case "storeProjInfo":

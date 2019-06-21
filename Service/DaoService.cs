@@ -40,7 +40,7 @@ namespace NEL_FutureDao_API.Service
         }
         
         // 发布治理
-        public JArray storeVoteInfo(string hash, string voteHash, string address, string voter, string name, string summary, string detail)
+        public JArray storeVoteInfo(string hash, string voteHash, string txid, string address, string voter, string name, string summary, string detail)
         {
             string findStr = new JObject { { "hash",hash},{ "voteHash", voteHash }, { "address", address }, { "name", name } }.ToString();
             if(mh.GetDataCount(mongodbConnStr, mongodbDatabase, voteInfoCol, findStr) == 0)
@@ -48,6 +48,7 @@ namespace NEL_FutureDao_API.Service
                 var newdata = new JObject {
                     { "hash", hash},
                     { "voteHash", voteHash},
+                    { "txid", txid},
                     { "address", address},
                     { "voter", voter},
                     { "name", name},
