@@ -62,6 +62,9 @@ namespace NEL_FutureDao_API.Controllers
                     case "getServiceList":
                         result = daoService.getServiceList(int.Parse(req.@params[0].ToString()), int.Parse(req.@params[1].ToString()));
                         break;
+                    case "getUserInfo":
+                        result = daoService.getUserInfo(req.@params[0].ToString());
+                        break;
                     case "getHashInfoByVoteHash":
                         result = daoService.getHashInfoByVoteHash(req.@params[0].ToString());
                         break;

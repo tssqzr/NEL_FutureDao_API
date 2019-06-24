@@ -10,6 +10,7 @@ namespace NEL_FutureDao_API.Service
         public string mongodbConnStr { get; set; }
         public string mongodbDatabase { get; set; }
 
+        private string userInfoCol = "futureDao_UserInfo";
         private string projInfoCol = "futureDao_ProjInfo";
         private string voteInfoCol = "futureDao_VoteInfo";
         private string ethPriceStateCol = "ethPriceState";
@@ -81,7 +82,9 @@ namespace NEL_FutureDao_API.Service
             var creator = "";
             var address = "";
             var projName = "";
-            fieldStr = new JObject { { "voteHash", 1 }, { "address", 1 }, { "creator",1},{ "projName",1}  }.ToString();
+            var projDetail = "";
+            fieldStr = new JObject { { "voteHash", 1 }, { "address", 1 }, { "creator",1},{ "projName",1},{ "projDetail",1}
+        }.ToString();
             var subres = mh.GetDataWithField(mongodbConnStr, mongodbDatabase, projInfoCol, fieldStr, findStr);
             if(subres != null && subres.Count > 0)
             {
@@ -89,9 +92,10 @@ namespace NEL_FutureDao_API.Service
                 address = subres[0]["address"].ToString();
                 creator = subres[0]["creator"].ToString();
                 projName = subres[0]["projName"].ToString();
+                projDetail = subres[0]["projDetail"].ToString();
             }
 
-            return new JArray { new JObject { { "voteHash", voteHash }, { "address", address }, { "creator", creator}, { "projName", projName }, { "joinCount", joinCount } } };
+            return new JArray { new JObject { { "voteHash", voteHash }, { "address", address }, { "creator", creator}, { "projName", projName },{ "projDetail", projDetail }, { "joinCount", joinCount } } };
         }
         public JArray getProjTxHistList(string hash, int pageNum=1, int pageSize=10)
         {
@@ -139,6 +143,7 @@ namespace NEL_FutureDao_API.Service
             string fieldStr = new JObject { { "_id",0},
                 { "hash", 1 },
                 { "voteHash", 1 },
+                { "proposalIndex", 1 },
                 { "proposalName", 1 },
                 { "timeConsuming", 1 },
                 { "proposer",1 },
@@ -179,6 +184,14 @@ namespace NEL_FutureDao_API.Service
 
             return new JArray { new JObject { { "hash", queryRes[0]["hash"].ToString() }, { "projName", queryRes[0]["projName"].ToString() } } };
         }
+        public JArray getUserInfo(string address)
+        {
+            string findStr = new JObject { { "address", address } }.ToString();
+            string fieldStr = new JObject { { "_id", 0} }.ToString();
+            return mh.GetDataWithField(mongodbConnStr, mongodbDatabase, userInfoCol, fieldStr, findStr);
+        }
+
+
         // 显示.查询服务列表
         public JArray getServiceList(int pageNum=1, int pageSize=10)
         {
